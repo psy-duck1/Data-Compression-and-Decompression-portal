@@ -10,7 +10,7 @@ const Statistics = require('../utils/statistics');
 
 const router = express.Router();
 
-// Configure multer for compressed file uploads
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const tempDir = path.join(__dirname, '../../temp');
@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, 
 });
 
 router.post('/', upload.single('file'), async (req, res) => {
@@ -44,10 +44,10 @@ router.post('/', upload.single('file'), async (req, res) => {
     const decompressedDir = path.join(__dirname, '../../temp');
     FileHandler.ensureDirectoryExists(decompressedDir);
     
-    // Generate output filename
+    
     let outputFilename = req.file.originalname;
     
-    // Remove compression suffixes if present
+    
     const compressionSuffixes = ['_huffman_compressed', '_lz77_compressed', '_rle_compressed'];
     compressionSuffixes.forEach(suffix => {
       if (outputFilename.includes(suffix)) {
@@ -64,7 +64,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     const compressedSize = FileHandler.getFileSize(inputPath);
     const startTime = Date.now();
 
-    // Perform decompression based on algorithm
+    
     try {
       switch (algorithm) {
         case 'huffman':
@@ -78,7 +78,7 @@ router.post('/', upload.single('file'), async (req, res) => {
           break;
       }
     } catch (decompressionError) {
-      // Clean up uploaded file
+      
       FileHandler.deleteFile(inputPath);
       throw new Error(`Decompression failed: ${decompressionError.message}`);
     }
@@ -86,11 +86,11 @@ router.post('/', upload.single('file'), async (req, res) => {
     const decompressionTime = Date.now() - startTime;
     const decompressedSize = FileHandler.getFileSize(outputPath);
     
-    // Generate decompression statistics
+    
     const stats = Statistics.calculateCompressionStats(decompressedSize, compressedSize);
     const algorithmInfo = Statistics.getAlgorithmInfo(algorithm);
 
-    // Clean up compressed file
+    
     FileHandler.deleteFile(inputPath);
 
     res.json({
@@ -105,7 +105,7 @@ router.post('/', upload.single('file'), async (req, res) => {
           compressedSize,
           decompressedSize,
           decompressionTime,
-          expansionRatio: stats.compressionRatio, // This will be negative for expansion
+          expansionRatio: stats.compressionRatio, 
           compressedSizeFormatted: Statistics.formatFileSize(compressedSize),
           decompressedSizeFormatted: Statistics.formatFileSize(decompressedSize)
         },
@@ -116,7 +116,7 @@ router.post('/', upload.single('file'), async (req, res) => {
   } catch (error) {
     console.error('Decompression error:', error);
     
-    // Clean up files in case of error
+    
     if (req.file && req.file.path) {
       FileHandler.deleteFile(req.file.path);
     }

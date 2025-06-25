@@ -39,7 +39,7 @@ class FileHandler {
     }
   }
 
-  static cleanupTempFiles(maxAge = 3600000) { // 1 hour default
+  static cleanupTempFiles(maxAge = 3600000) { 
     const tempDir = path.join(__dirname, '../../temp');
     if (!fs.existsSync(tempDir)) return;
 

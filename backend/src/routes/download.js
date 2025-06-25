@@ -5,7 +5,7 @@ const FileHandler = require('../utils/fileHandler');
 
 const router = express.Router();
 
-// Download compressed files
+
 router.get('/compressed/:filename', (req, res) => {
   try {
     const { filename } = req.params;
@@ -17,12 +17,12 @@ router.get('/compressed/:filename', (req, res) => {
 
     const fileSize = FileHandler.getFileSize(filePath);
     
-    // Set appropriate headers
+    
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Length', fileSize);
     
-    // Stream the file
+    
     const fileStream = fs.createReadStream(filePath);
     fileStream.pipe(res);
     
@@ -42,7 +42,7 @@ router.get('/compressed/:filename', (req, res) => {
   }
 });
 
-// Download decompressed files
+
 router.get('/decompressed/:filename', (req, res) => {
   try {
     const { filename } = req.params;
@@ -54,12 +54,12 @@ router.get('/decompressed/:filename', (req, res) => {
 
     const fileSize = FileHandler.getFileSize(filePath);
     
-    // Set appropriate headers
+    
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', 'application/octet-stream');
     res.setHeader('Content-Length', fileSize);
     
-    // Stream the file
+    
     const fileStream = fs.createReadStream(filePath);
     fileStream.pipe(res);
     
@@ -79,7 +79,7 @@ router.get('/decompressed/:filename', (req, res) => {
   }
 });
 
-// Get file info before download
+
 router.get('/info/:type/:filename', (req, res) => {
   try {
     const { type, filename } = req.params;

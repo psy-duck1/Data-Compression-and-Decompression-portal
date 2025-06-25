@@ -1,4 +1,4 @@
-/* Full Width Layout */
+
 * {
   box-sizing: border-box;
 }
@@ -20,24 +20,24 @@ html, body {
   min-height: 100vh;
 }
 
-/* Container adjustments */
+
 .min-h-screen {
   width: 100vw;
   min-height: 100vh;
 }
 
-/* Header full width */
+
 header {
   width: 100%;
 }
 
-/* Main content full width */
+
 main {
   width: 100%;
   max-width: none;
 }
 
-/* Tab navigation styling */
+
 nav {
   display: flex;
   width: 100%;
@@ -59,7 +59,7 @@ nav button {
   outline: none;
 }
 
-/* Force white backgrounds for all tabs */
+
 nav button,
 nav button:hover,
 nav button:focus,
@@ -67,20 +67,20 @@ nav button:active {
   background-color: white !important;
 }
 
-/* Active tab styling */
+
 nav button[style*="rgb(239, 246, 255)"] {
   background-color: #eff6ff !important;
   color: #2563eb !important;
   border-bottom-color: #2563eb !important;
 }
 
-/* Hover state for inactive tabs */
+
 nav button:hover:not([style*="rgb(239, 246, 255)"]) {
   background-color: #f9fafb !important;
   color: #374151 !important;
 }
 
-/* Remove any max-width constraints */
+
 .max-w-7xl,
 .max-w-6xl,
 .max-w-4xl {
@@ -88,17 +88,17 @@ nav button:hover:not([style*="rgb(239, 246, 255)"]) {
   width: 100%;
 }
 
-/* Ensure all containers use full width */
+
 .w-full {
   width: 100% !important;
 }
 
-/* Content area adjustments */
+
 .space-y-8 > * {
   width: 100%;
 }
 
-/* Enhanced animations */
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -117,7 +117,7 @@ nav button:hover:not([style*="rgb(239, 246, 255)"]) {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Hover effects */
+
 .hover\:scale-102:hover {
   transform: scale(1.02);
 }
@@ -126,7 +126,7 @@ nav button:hover:not([style*="rgb(239, 246, 255)"]) {
   transform: scale(1.05);
 }
 
-/* Custom scrollbar */
+
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -145,7 +145,7 @@ nav button:hover:not([style*="rgb(239, 246, 255)"]) {
   background: linear-gradient(to bottom, #94a3b8, #64748b);
 }
 
-/* Backdrop blur support */
+
 .backdrop-blur-sm {
   backdrop-filter: blur(4px);
 }
@@ -154,7 +154,7 @@ nav button:hover:not([style*="rgb(239, 246, 255)"]) {
   backdrop-filter: blur(12px);
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 768px) {
   .px-4 {
     padding-left: 1rem;
@@ -175,18 +175,18 @@ nav button:hover:not([style*="rgb(239, 246, 255)"]) {
   }
 }
 
-/* Remove any margin constraints */
+
 .mx-auto {
   margin-left: 0;
   margin-right: 0;
 }
 
-/* Override any inherited dark styles */
+
 .bg-white {
   background-color: white !important;
 }
 
-/* Ensure tab container backgrounds are white */
+
 .border-b.border-gray-200 {
   background-color: white !important;
 }

@@ -13,7 +13,7 @@ const FileDownload = ({ filename, type, originalFilename }) => {
 
       const blob = await ApiService.downloadFile(type, filename);
       
-      // Create download link
+      
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -21,7 +21,7 @@ const FileDownload = ({ filename, type, originalFilename }) => {
       document.body.appendChild(link);
       link.click();
       
-      // Cleanup
+      
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
       

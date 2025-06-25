@@ -1,6 +1,6 @@
 const { body, param, validationResult } = require('express-validator');
 
-// Validation middleware to check for errors
+
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -12,7 +12,7 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Algorithm validation
+
 const validateAlgorithm = [
   body('algorithm')
     .isIn(['huffman', 'lz77', 'rle'])
@@ -20,7 +20,7 @@ const validateAlgorithm = [
   handleValidationErrors
 ];
 
-// File validation
+
 const validateFile = (req, res, next) => {
   if (!req.file) {
     return res.status(400).json({
@@ -29,7 +29,7 @@ const validateFile = (req, res, next) => {
     });
   }
 
-  // Check file size (additional check beyond multer)
+  
   if (req.file.size === 0) {
     return res.status(400).json({
       error: 'Validation failed',
@@ -37,7 +37,7 @@ const validateFile = (req, res, next) => {
     });
   }
 
-  // Check filename
+  
   if (!req.file.originalname || req.file.originalname.trim() === '') {
     return res.status(400).json({
       error: 'Validation failed',
@@ -48,7 +48,7 @@ const validateFile = (req, res, next) => {
   next();
 };
 
-// Filename parameter validation
+
 const validateFilename = [
   param('filename')
     .isLength({ min: 1, max: 255 })
@@ -58,7 +58,7 @@ const validateFilename = [
   handleValidationErrors
 ];
 
-// File type validation
+
 const validateFileType = [
   param('type')
     .isIn(['compressed', 'decompressed'])
@@ -66,7 +66,7 @@ const validateFileType = [
   handleValidationErrors
 ];
 
-// Rate limiting validation (basic implementation)
+
 const rateLimitMap = new Map();
 
 const rateLimit = (maxRequests = 10, windowMs = 60000) => {

@@ -11,7 +11,7 @@ const IntegrityChecker = require('../utils/integrity');
 
 const router = express.Router();
 
-// Configure multer for file uploads
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../../uploads');
@@ -26,9 +26,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
-    // Allow all file types for compression
+    
     cb(null, true);
   }
 });
@@ -55,11 +55,11 @@ router.post('/', upload.single('file'), async (req, res) => {
     );
     const outputPath = path.join(compressedDir, compressedFilename);
 
-    // Generate original file metadata
+    
     const originalMetadata = IntegrityChecker.generateFileMetadata(inputPath);
     const originalSize = FileHandler.getFileSize(inputPath);
 
-    // Perform compression based on algorithm
+    
     const startTime = Date.now();
     
     try {
@@ -75,7 +75,7 @@ router.post('/', upload.single('file'), async (req, res) => {
           break;
       }
     } catch (compressionError) {
-      // Clean up uploaded file
+      
       FileHandler.deleteFile(inputPath);
       throw new Error(`Compression failed: ${compressionError.message}`);
     }
@@ -83,11 +83,11 @@ router.post('/', upload.single('file'), async (req, res) => {
     const compressionTime = Date.now() - startTime;
     const compressedSize = FileHandler.getFileSize(outputPath);
     
-    // Generate compression statistics
+    
     const stats = Statistics.calculateCompressionStats(originalSize, compressedSize);
     const algorithmInfo = Statistics.getAlgorithmInfo(algorithm);
 
-    // Clean up original uploaded file
+    
     FileHandler.deleteFile(inputPath);
 
     res.json({
@@ -118,7 +118,7 @@ router.post('/', upload.single('file'), async (req, res) => {
   } catch (error) {
     console.error('Compression error:', error);
     
-    // Clean up files in case of error
+    
     if (req.file && req.file.path) {
       FileHandler.deleteFile(req.file.path);
     }

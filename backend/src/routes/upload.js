@@ -6,7 +6,7 @@ const IntegrityChecker = require('../utils/integrity');
 
 const router = express.Router();
 
-// Configure multer for general file uploads
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../../uploads');
@@ -23,11 +23,11 @@ const storage = multer.diskStorage({
 const upload = multer({ 
   storage,
   limits: { 
-    fileSize: 50 * 1024 * 1024, // 50MB limit
+    fileSize: 50 * 1024 * 1024, 
     files: 1
   },
   fileFilter: (req, file, cb) => {
-    // Basic file validation
+    
     if (file.size === 0) {
       return cb(new Error('Empty file not allowed'), false);
     }
@@ -35,7 +35,7 @@ const upload = multer({
   }
 });
 
-// Upload file endpoint
+
 router.post('/', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -45,7 +45,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     const filePath = req.file.path;
     const fileSize = FileHandler.getFileSize(filePath);
     
-    // Generate file metadata and integrity information
+    
     const metadata = IntegrityChecker.generateFileMetadata(filePath);
 
     res.json({
@@ -66,7 +66,7 @@ router.post('/', upload.single('file'), async (req, res) => {
   } catch (error) {
     console.error('Upload error:', error);
     
-    // Clean up file in case of error
+    
     if (req.file && req.file.path) {
       FileHandler.deleteFile(req.file.path);
     }
@@ -78,7 +78,7 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
-// Get upload status
+
 router.get('/status/:filename', (req, res) => {
   try {
     const { filename } = req.params;

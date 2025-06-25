@@ -25,7 +25,7 @@ const DecompressUpload = () => {
       setResult(null);
 
       const response = await ApiService.decompressFile(selectedFile, selectedAlgorithm);
-      // Add algorithm info to the stats
+      
       const enhancedResult = {
         ...response.data,
         statistics: {
