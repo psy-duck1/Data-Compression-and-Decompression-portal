@@ -1,164 +1,131 @@
 const express = require('express');
-const fs = require('fs-extra'); 
-const path = require('path'); 
-const fileHandler = require('../utils/fileHandler');
-const CompressionStatistics = require('../utils/statistics');
-const IntegrityChecker = require('../utils/integrity'); 
-
-
-const HuffmanCoding = require('../algorithms/huffman');
-const RunLengthEncoding = require('../algorithms/rle');
-const LZ77 = require('../algorithms/lz77');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+const huffman = require('../algorithms/huffman');
+const lz77 = require('../algorithms/lz77');
+const rle = require('../algorithms/rle');
+const FileHandler = require('../utils/fileHandler');
+const Statistics = require('../utils/statistics');
 
 const router = express.Router();
 
+// Configure multer for compressed file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const tempDir = path.join(__dirname, '../../temp');
+    FileHandler.ensureDirectoryExists(tempDir);
+    cb(null, tempDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = FileHandler.generateUniqueFilename(file.originalname, 'decompress');
+    cb(null, uniqueName);
+  }
+});
 
-const algorithms = {
-    huffman: new HuffmanCoding(),
-    rle: new RunLengthEncoding(),
-    lz77: new LZ77()
-};
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+});
 
-
-router.post('/', async (req, res, next) => {
-    try {
-        const { compressedFileId, algorithm, originalSize, metadataFileId } = req.body;
-
-        if (!compressedFileId || !algorithm) {
-            return res.status(400).json({
-                error: true,
-                code: 'MISSING_REQUIRED_DATA',
-                message: 'compressedFileId and algorithm are required'
-            });
-        }
-
-        
-        const { buffer: compressedBuffer } = await fileHandler.readFile(compressedFileId, 'uploads');
-
-        
-        const stats = new CompressionStatistics();
-        stats.startTiming();
-
-        
-        const algorithmInstance = algorithms[algorithm];
-        if (!algorithmInstance) {
-            return res.status(400).json({
-                error: true,
-                code: 'ALGORITHM_NOT_SUPPORTED',
-                message: `Algorithm ${algorithm} is not supported for decompression`
-            });
-        }
-
-        let decompressedBuffer;
-        const estimatedSize = originalSize || Math.max(compressedBuffer.length * 3, 1024);
-
-        try {
-            switch (algorithm) {
-                case 'huffman':
-                    
-                    try {
-                        
-                        const metadataFiles = await fs.readdir(fileHandler.compressedDir);
-                        const metadataFile = metadataFiles.find(file => 
-                            file.startsWith('metadata_') && file.includes(compressedFileId) && file.endsWith('.json')
-                        );
-                        
-                        if (metadataFile) {
-                            const metadataPath = path.join(fileHandler.compressedDir, metadataFile);
-                            const metadata = JSON.parse(await fs.readFile(metadataPath, 'utf8'));
-                            
-                            decompressedBuffer = algorithmInstance.decompress(
-                                compressedBuffer,
-                                metadata.tree,
-                                metadata.originalSize,
-                                metadata.padding,
-                                metadata.singleChar
-                            );
-                            console.log(`Huffman decompressed with metadata: ${decompressedBuffer.length} bytes`);
-                        } else {
-                            
-                            console.warn('No Huffman metadata found, using simple decompression');
-                            decompressedBuffer = algorithmInstance.decompressSimple(compressedBuffer, estimatedSize);
-                        }
-                    } catch (metadataError) {
-                        console.warn('Huffman metadata error:', metadataError.message);
-                        decompressedBuffer = algorithmInstance.decompressSimple(compressedBuffer, estimatedSize);
-                    }
-                    break;
-
-                case 'rle':
-                    decompressedBuffer = algorithmInstance.decompressSimple(compressedBuffer, estimatedSize);
-                    console.log(`RLE decompressed: ${decompressedBuffer.length} bytes`);
-                    break;
-
-                case 'lz77':
-                    decompressedBuffer = algorithmInstance.decompressSimple(compressedBuffer, estimatedSize);
-                    console.log(`LZ77 decompressed: ${decompressedBuffer.length} bytes`);
-                    break;
-
-                default:
-                    throw new Error(`Unsupported algorithm: ${algorithm}`);
-            }
-
-        } catch (algorithmError) {
-            console.error(`${algorithm} decompression error:`, algorithmError.message);
-            throw new Error(`${algorithm.toUpperCase()} decompression failed: ${algorithmError.message}. The file may not be compressed with this algorithm or may be corrupted.`);
-        }
-
-        stats.endTiming();
-
-        
-        if (originalSize && decompressedBuffer.length !== originalSize) {
-            console.warn(`Size mismatch: expected ${originalSize}, got ${decompressedBuffer.length}`);
-        }
-
-        
-        const decompressedChecksum = IntegrityChecker.generateChecksum(decompressedBuffer);
-        console.log(`Decompressed data checksum: ${decompressedChecksum}`);
-
-        
-        const decompressedFile = await fileHandler.saveFile(
-            decompressedBuffer,
-            `decompressed_${compressedFileId}_${Date.now()}.bin`,
-            'uploads'
-        );
-
-        
-        const statisticsReport = {
-            algorithm,
-            compressedSize: compressedBuffer.length,
-            decompressedSize: decompressedBuffer.length,
-            processingTime: stats.getProcessingTime(),
-            success: true,
-            timestamp: new Date().toISOString(),
-            checksum: decompressedChecksum 
-        };
-
-        res.json({
-            success: true,
-            decompressedFileId: decompressedFile.fileId,
-            statistics: statisticsReport,
-            downloadUrl: `/api/download/${decompressedFile.fileId}`,
-            originalSize: decompressedBuffer.length
-        });
-
-    } catch (error) {
-        if (error.message.includes('not found')) {
-            return res.status(404).json({
-                error: true,
-                code: 'FILE_NOT_FOUND',
-                message: 'Compressed file not found'
-            });
-        }
-
-        console.error('Decompression error:', error);
-        next({
-            isOperational: true,
-            statusCode: 500,
-            code: 'DECOMPRESSION_FAILED',
-            message: error.message || 'Failed to decompress file'
-        });
+router.post('/', upload.single('file'), async (req, res) => {
+  try {
+    const { algorithm } = req.body;
+    
+    if (!req.file) {
+      return res.status(400).json({ error: 'No compressed file uploaded' });
     }
+
+    if (!algorithm || !['huffman', 'lz77', 'rle'].includes(algorithm)) {
+      return res.status(400).json({ error: 'Invalid decompression algorithm' });
+    }
+
+    const inputPath = req.file.path;
+    const decompressedDir = path.join(__dirname, '../../temp');
+    FileHandler.ensureDirectoryExists(decompressedDir);
+    
+    // Generate output filename
+    let outputFilename = req.file.originalname;
+    
+    // Remove compression suffixes if present
+    const compressionSuffixes = ['_huffman_compressed', '_lz77_compressed', '_rle_compressed'];
+    compressionSuffixes.forEach(suffix => {
+      if (outputFilename.includes(suffix)) {
+        outputFilename = outputFilename.replace(suffix, '');
+      }
+    });
+    
+    const decompressedFilename = FileHandler.generateUniqueFilename(
+      outputFilename, 
+      `${algorithm}_decompressed`
+    );
+    const outputPath = path.join(decompressedDir, decompressedFilename);
+
+    const compressedSize = FileHandler.getFileSize(inputPath);
+    const startTime = Date.now();
+
+    // Perform decompression based on algorithm
+    try {
+      switch (algorithm) {
+        case 'huffman':
+          huffman.decompress(inputPath, outputPath);
+          break;
+        case 'lz77':
+          lz77.decompress(inputPath, outputPath);
+          break;
+        case 'rle':
+          rle.rleDecompress(inputPath, outputPath);
+          break;
+      }
+    } catch (decompressionError) {
+      // Clean up uploaded file
+      FileHandler.deleteFile(inputPath);
+      throw new Error(`Decompression failed: ${decompressionError.message}`);
+    }
+
+    const decompressionTime = Date.now() - startTime;
+    const decompressedSize = FileHandler.getFileSize(outputPath);
+    
+    // Generate decompression statistics
+    const stats = Statistics.calculateCompressionStats(decompressedSize, compressedSize);
+    const algorithmInfo = Statistics.getAlgorithmInfo(algorithm);
+
+    // Clean up compressed file
+    FileHandler.deleteFile(inputPath);
+
+    res.json({
+      success: true,
+      message: 'File decompressed successfully',
+      data: {
+        originalFilename: req.file.originalname,
+        decompressedFilename,
+        algorithm,
+        algorithmInfo,
+        statistics: {
+          compressedSize,
+          decompressedSize,
+          decompressionTime,
+          expansionRatio: stats.compressionRatio, // This will be negative for expansion
+          compressedSizeFormatted: Statistics.formatFileSize(compressedSize),
+          decompressedSizeFormatted: Statistics.formatFileSize(decompressedSize)
+        },
+        downloadUrl: `/api/download/decompressed/${decompressedFilename}`
+      }
+    });
+
+  } catch (error) {
+    console.error('Decompression error:', error);
+    
+    // Clean up files in case of error
+    if (req.file && req.file.path) {
+      FileHandler.deleteFile(req.file.path);
+    }
+
+    res.status(500).json({
+      error: 'Decompression failed',
+      message: error.message
+    });
+  }
 });
 
 module.exports = router;

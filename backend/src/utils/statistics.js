@@ -1,62 +1,60 @@
-class CompressionStatistics {
-    constructor() {
-        this.startTime = null;
-        this.endTime = null;
+class Statistics {
+    static calculateCompressionRatio(originalSize, compressedSize) {
+      if (originalSize === 0) return 0;
+      return ((originalSize - compressedSize) / originalSize) * 100;
     }
-
-    startTiming() {
-        this.startTime = process.hrtime.bigint();
+  
+    static calculateCompressionStats(originalSize, compressedSize) {
+      const ratio = this.calculateCompressionRatio(originalSize, compressedSize);
+      const spaceSaved = originalSize - compressedSize;
+      
+      return {
+        originalSize,
+        compressedSize,
+        compressionRatio: Math.round(ratio * 100) / 100,
+        spaceSaved,
+        compressionFactor: originalSize / compressedSize || 0
+      };
     }
-
-    endTiming() {
-        this.endTime = process.hrtime.bigint();
+  
+    static formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
-
-    getProcessingTime() {
-        if (!this.startTime || !this.endTime) {
-            return 0;
+  
+    static getAlgorithmInfo(algorithm) {
+      const algorithms = {
+        huffman: {
+          name: 'Huffman Coding',
+          description: 'Variable-length prefix coding algorithm',
+          bestFor: 'Text files with repeated characters',
+          timeComplexity: 'O(n log n)',
+          spaceComplexity: 'O(n)'
+        },
+        lz77: {
+          name: 'LZ77 Compression',
+          description: 'Dictionary-based compression algorithm',
+          bestFor: 'Files with repeated patterns',
+          timeComplexity: 'O(n²)',
+          spaceComplexity: 'O(n)'
+        },
+        rle: {
+          name: 'Run Length Encoding',
+          description: 'Simple compression for consecutive repeated data',
+          bestFor: 'Images with large areas of same color',
+          timeComplexity: 'O(n)',
+          spaceComplexity: 'O(1)'
         }
-        return Number(this.endTime - this.startTime) / 1000000; 
+      };
+  
+      return algorithms[algorithm] || null;
     }
-
-    calculateCompressionRatio(originalSize, compressedSize) {
-        if (originalSize === 0) return 0;
-        return ((originalSize - compressedSize) / originalSize) * 100;
-    }
-
-    calculateSpaceSaved(originalSize, compressedSize) {
-        return {
-            bytes: originalSize - compressedSize,
-            percentage: this.calculateCompressionRatio(originalSize, compressedSize)
-        };
-    }
-
-    generateReport(originalSize, compressedSize, algorithm) {
-        const processingTime = this.getProcessingTime();
-        const compressionRatio = this.calculateCompressionRatio(originalSize, compressedSize);
-        const spaceSaved = this.calculateSpaceSaved(originalSize, compressedSize);
-
-        return {
-            algorithm,
-            originalSize,
-            compressedSize,
-            compressionRatio: Math.round(compressionRatio * 100) / 100,
-            spaceSaved,
-            processingTime: Math.round(processingTime * 100) / 100,
-            efficiency: this.calculateEfficiency(compressionRatio, processingTime),
-            timestamp: new Date().toISOString()
-        };
-    }
-
-    calculateEfficiency(compressionRatio, processingTime) {
-        
-        if (processingTime === 0) return 100;
-        
-        const timeScore = Math.max(0, 100 - (processingTime / 1000));
-        const compressionScore = Math.min(100, compressionRatio);
-        
-        return Math.round(((compressionScore * 0.7) + (timeScore * 0.3)) * 100) / 100;
-    }
-}
-
-module.exports = CompressionStatistics;
+  }
+  
+  module.exports = Statistics;
+  

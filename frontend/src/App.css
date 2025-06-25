@@ -1,174 +1,192 @@
+/* Full Width Layout */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 #root {
-    max-width: 100%;
-    margin: 0 auto;
-    text-align: left;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Container adjustments */
+.min-h-screen {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+/* Header full width */
+header {
+  width: 100%;
+}
+
+/* Main content full width */
+main {
+  width: 100%;
+  max-width: none;
+}
+
+/* Tab navigation styling */
+nav {
+  display: flex;
+  width: 100%;
+  background-color: white !important;
+}
+
+nav button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  min-height: 60px;
+  width: 33.333%;
+  background-color: white !important;
+  border: none;
+  outline: none;
+}
+
+/* Force white backgrounds for all tabs */
+nav button,
+nav button:hover,
+nav button:focus,
+nav button:active {
+  background-color: white !important;
+}
+
+/* Active tab styling */
+nav button[style*="rgb(239, 246, 255)"] {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+  border-bottom-color: #2563eb !important;
+}
+
+/* Hover state for inactive tabs */
+nav button:hover:not([style*="rgb(239, 246, 255)"]) {
+  background-color: #f9fafb !important;
+  color: #374151 !important;
+}
+
+/* Remove any max-width constraints */
+.max-w-7xl,
+.max-w-6xl,
+.max-w-4xl {
+  max-width: none;
+  width: 100%;
+}
+
+/* Ensure all containers use full width */
+.w-full {
+  width: 100% !important;
+}
+
+/* Content area adjustments */
+.space-y-8 > * {
+  width: 100%;
+}
+
+/* Enhanced animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Hover effects */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #94a3b8, #64748b);
+}
+
+/* Backdrop blur support */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
   
-  
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+  nav button {
+    flex-direction: column;
+    padding: 1rem 0.5rem;
+    font-size: 0.75rem;
   }
   
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
+  nav button .h-5 {
+    height: 1rem;
+    width: 1rem;
+    margin-right: 0;
+    margin-bottom: 0.25rem;
   }
-  
-  .logo.react:hover {
-    filter: drop-shadow(0 0 2em #61dafbaa);
-  }
-  
-  @keyframes logo-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  @media (prefers-reduced-motion: no-preference) {
-    a:nth-of-type(2) .logo {
-      animation: logo-spin infinite 20s linear;
-    }
-  }
-  
-  
-  .compression-portal {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
-  
-  .step-indicator {
-    position: relative;
-  }
-  
-  .step-indicator::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 100%;
-    width: 2rem;
-    height: 2px;
-    background: #e5e7eb;
-    transform: translateY(-50%);
-  }
-  
-  .step-indicator.active::after {
-    background: #3b82f6;
-  }
-  
-  .file-drop-zone {
-    transition: all 0.3s ease;
-    border: 2px dashed #d1d5db;
-  }
-  
-  .file-drop-zone.active {
-    border-color: #3b82f6;
-    background-color: #eff6ff;
-    transform: scale(1.02);
-  }
-  
-  .algorithm-card {
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-  
-  .algorithm-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
-  
-  .algorithm-card.selected {
-    border-color: #3b82f6;
-    background-color: #eff6ff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-  
-  
-  .chart-container {
-    animation: fadeInUp 0.6s ease-out;
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  
-  .progress-bar {
-    overflow: hidden;
-    border-radius: 0.5rem;
-  }
-  
-  .progress-fill {
-    transition: width 0.3s ease;
-    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
-  }
-  
-  
-  .spinner {
-    border: 3px solid #f3f4f6;
-    border-top: 3px solid #3b82f6;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  
-  .error-shake {
-    animation: shake 0.5s ease-in-out;
-  }
-  
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-  }
-  
-  
-  .success-bounce {
-    animation: bounce 0.6s ease-in-out;
-  }
-  
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  
-  
-  @media (max-width: 768px) {
-    .step-indicator::after {
-      display: none;
-    }
-    
-    .algorithm-card {
-      margin-bottom: 1rem;
-    }
-  }
-  
-  
-  @media print {
-    .no-print {
-      display: none !important;
-    }
-    
-    body {
-      background: white !important;
-    }
-  }
-  
+}
+
+/* Remove any margin constraints */
+.mx-auto {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Override any inherited dark styles */
+.bg-white {
+  background-color: white !important;
+}
+
+/* Ensure tab container backgrounds are white */
+.border-b.border-gray-200 {
+  background-color: white !important;
+}
